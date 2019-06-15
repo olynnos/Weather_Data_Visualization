@@ -25,18 +25,29 @@ with open(filename) as f:
             datetm = "-".join([row[1][:4], row[1][4:6], row[1][6:]])
             date_formatted = datetime.strptime(datetm, '%Y-%m-%d')
             date.append(date_formatted)
-            if row[11].isspace():
-                average_temp.append(0)
+            try:
+                average_temp.append(int(row[11])*0.1)
+                min_temp.append(int(row[12]) * 0.1)
+                max_temp.append(int(row[14]) * 0.1)
+            except ValueError:
+                print(f"Missing data for{date_formatted}")
             else:
-                average_temp.append(int(row[11]))
-            if row[12].isspace():
-                min_temp.append(0)
-            else:
-                min_temp.append(int(row[12]))
-            if row[13].isspace():
-                max_temp.append(0)
-            else:
-                max_temp.append(int(row[14]))
+                average_temp.append(int(row[11]) * 0.1)
+                min_temp.append(int(row[12]) * 0.1)
+                max_temp.append(int(row[14]) * 0.1)
+
+            # if row[11].isspace():
+            #     average_temp.append(0)
+            # else:
+            #     average_temp.append(int(row[11])*0.1)
+            # if row[12].isspace():
+            #     min_temp.append(0)
+            # else:
+            #     min_temp.append(int(row[12])*0.1)
+            # if row[13].isspace():
+            #     max_temp.append(0)
+            # else:
+            #     max_temp.append(int(row[14])*0.1)
         else:
             continue
 
@@ -51,8 +62,17 @@ with open(filename) as f:
 
 plt.style.use('seaborn')
 fig, ax = plt.subplots()
+
+plt.title('Min and max temp of the last 10 readings', fontsize=24)
+plt.ylabel("Temperature in (C)", fontsize=16)
+plt.xlabel("Day of recorded temp", fontsize=16)
+
+plt.tick_params(axis='both', which='major', labelsize=16)
+
 # show last data that was gathered of min_temp
-ax.plot(date[-10:], min_temp[-10:], c='red')
+ax.plot(date[-100:], min_temp[-100:], c='blue')
+ax.plot(date[-100:], max_temp[-100:], c='red')
+plt.fill_between(date[-100:], max_temp[-100:], min_temp[-100:], facecolor="grey", alpha=0.1)
 
 # draws date label diagonally
 fig.autofmt_xdate()
