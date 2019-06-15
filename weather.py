@@ -9,7 +9,7 @@ with open(filename) as f:
     reader = csv.reader(f)
     header_row = next(reader)
 
-    station_number, date, average_temp, min_temp, max_temp = [], [], [], [], []
+    station_number, date, average_temp, min_temp, max_temp, missing_data = [], [], [], [], [], []
 
     # for index, column_header in enumerate(header_row):
     #     print(index, column_header)
@@ -25,17 +25,20 @@ with open(filename) as f:
             datetm = "-".join([row[1][:4], row[1][4:6], row[1][6:]])
             date_formatted = datetime.strptime(datetm, '%Y-%m-%d')
             date.append(date_formatted)
+            # using a try except else block to handle missing data error
             try:
                 average_temp.append(int(row[11])*0.1)
                 min_temp.append(int(row[12]) * 0.1)
                 max_temp.append(int(row[14]) * 0.1)
-            except ValueError:
-                print(f"Missing data for{date_formatted}")
+            except ValueError as e:
+                missing_data.append(str(e))
+                # print(f"Missing data from {date_formatted}")
             else:
                 average_temp.append(int(row[11]) * 0.1)
                 min_temp.append(int(row[12]) * 0.1)
                 max_temp.append(int(row[14]) * 0.1)
 
+            # another way of handling error from missing data
             # if row[11].isspace():
             #     average_temp.append(0)
             # else:
@@ -63,11 +66,11 @@ with open(filename) as f:
 plt.style.use('seaborn')
 fig, ax = plt.subplots()
 
-plt.title('Min and max temp of the last 10 readings', fontsize=24)
-plt.ylabel("Temperature in (C)", fontsize=16)
+plt.title('Min and max temp of the last 100 readings', fontsize=20)
+plt.ylabel("Temperature in (C)", fontsize=10)
 plt.xlabel("Day of recorded temp", fontsize=16)
 
-plt.tick_params(axis='both', which='major', labelsize=16)
+plt.tick_params(axis='both', which='major', labelsize=10)
 
 # show last data that was gathered of min_temp
 ax.plot(date[-100:], min_temp[-100:], c='blue')
@@ -76,5 +79,7 @@ plt.fill_between(date[-100:], max_temp[-100:], min_temp[-100:], facecolor="grey"
 
 # draws date label diagonally
 fig.autofmt_xdate()
+
+print(len(missing_data))
 
 plt.show()
